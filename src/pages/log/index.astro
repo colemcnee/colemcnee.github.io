@@ -1,0 +1,29 @@
+---
+import Base from '../../layouts/Base.astro';
+import LogListItem from '../../components/LogListItem.astro';
+import { getLogEntries } from '../../lib/content';
+
+const entries = await getLogEntries();
+---
+
+<Base title="Log" description="Notes, process, and work in progress.">
+  <header class="entry-header">
+    <p class="eyebrow">Log</p>
+    <h1>Log</h1>
+    <p class="lede">
+      Working notes and longer pieces, newest first. <a href="/log/rss.xml">Subscribe via RSS</a>.
+    </p>
+  </header>
+
+  {
+    entries.length > 0 ? (
+      <ul class="entry-list">
+        {entries.map((entry) => (
+          <LogListItem entry={entry} />
+        ))}
+      </ul>
+    ) : (
+      <p class="meta">No entries yet.</p>
+    )
+  }
+</Base>

@@ -1,0 +1,78 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import MediumBadges from '../../components/MediumBadges.astro';
+import { getWorkEntries, getLogEntries, mediumsOf } from '../../lib/content';
+
+export const getStaticPaths = (async () => {
+  const entries = await getWorkEntries();
+  return entries.map((entry) => ({ params: { id: entry.id }, props: { entry } }));
+}) satisfies GetStaticPaths;
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+
+// Log entries that pointed back at this piece.
+const logEntries = await getLogEntries();
+const notes = logEntries.filter((log) => log.data.relatedWork.includes(entry.id));
+
+const facts = [
+  ['Year', entry.data.year],
+  ['Role', entry.data.role],
+  ['Venue', entry.data.venue],
+  ['With', entry.data.collaborators.join(', ') || undefined],
+].filter(([, value]) => Boolean(value)) as [string, string][];
+---
+
+<Base title={entry.data.title} description={entry.data.summary} type="article">
+  <article class="prose">
+    <header class="entry-header">
+      <MediumBadges mediums={mediumsOf(entry)} />
+      <h1>{entry.data.title}</h1>
+      <p class="lede">{entry.data.summary}</p>
+      {
+        facts.length > 0 && (
+          <p class="meta" style="margin-top: 0.9rem;">
+            {facts.map(([label, value], i) => (
+              <>
+                {i > 0 ? ' · ' : ''}
+                {label}: {value}
+              </>
+            ))}
+          </p>
+        )
+      }
+      {
+        entry.data.externalUrl && (
+          <p class="meta">
+            <a href={entry.data.externalUrl} rel="noopener">
+              Visit project &rarr;
+            </a>
+          </p>
+        )
+      }
+    </header>
+
+    <Content />
+
+    {
+      notes.length > 0 && (
+        <section>
+          <hr />
+          <h2>Notes from the log</h2>
+          <ul>
+            {notes.map((log) => (
+              <li>
+                <a href={`/log/${log.id}`}>{log.data.title}</a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    <hr />
+    <p class="meta"><a href="/work">&larr; All work</a></p>
+  </article>
+</Base>

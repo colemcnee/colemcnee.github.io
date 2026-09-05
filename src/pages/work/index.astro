@@ -1,0 +1,45 @@
+---
+import Base from '../../layouts/Base.astro';
+import WorkCard from '../../components/WorkCard.astro';
+import { getWorkEntries, mediumsOf } from '../../lib/content';
+import { MEDIUMS, MEDIUM_LABELS } from '../../content.config';
+
+const entries = await getWorkEntries();
+const counts = new Map(
+  MEDIUMS.map((medium) => [
+    medium,
+    entries.filter((entry) => mediumsOf(entry).includes(medium)).length,
+  ]),
+);
+---
+
+<Base title="Work" description="Projects in code, print, and performance.">
+  <header class="entry-header">
+    <p class="eyebrow">Work</p>
+    <h1>Work</h1>
+    <p class="lede">Everything, newest first. Filter by medium:</p>
+    <ul class="tag-row" style="margin-top: 0.9rem;">
+      {
+        MEDIUMS.filter((medium) => (counts.get(medium) ?? 0) > 0).map((medium) => (
+          <li>
+            <a class="badge" href={`/work/medium/${medium}`}>
+              {MEDIUM_LABELS[medium]} ({counts.get(medium)})
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </header>
+
+  {
+    entries.length > 0 ? (
+      <ul class="work-grid">
+        {entries.map((entry) => (
+          <WorkCard entry={entry} />
+        ))}
+      </ul>
+    ) : (
+      <p class="meta">Nothing here yet.</p>
+    )
+  }
+</Base>

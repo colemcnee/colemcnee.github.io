@@ -1,0 +1,69 @@
+---
+import { SITE_TITLE, SITE_DESCRIPTION, SITE_AUTHOR, NAV } from '../consts';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** Set on entry pages so the feed/OG type is right. */
+  type?: 'website' | 'article';
+}
+
+const { title, description = SITE_DESCRIPTION, type = 'website' } = Astro.props;
+const pageTitle = title ? `${title} — ${SITE_TITLE}` : SITE_TITLE;
+const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url);
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content={SITE_AUTHOR} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={`${SITE_TITLE} — Log`}
+      href={new URL('/log/rss.xml', Astro.site ?? Astro.url)}
+    />
+    <meta property="og:type" content={type} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary" />
+    <meta name="generator" content={Astro.generator} />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div class="wrap">
+      <header class="site-header">
+        <a class="site-title" href="/">{SITE_TITLE}</a>
+        <nav class="site-nav" aria-label="Primary">
+          {
+            NAV.map((item) => (
+              <a
+                href={item.href}
+                aria-current={path === item.href || path.startsWith(`${item.href}/`) ? 'page' : undefined}
+              >
+                {item.label}
+              </a>
+            ))
+          }
+        </nav>
+      </header>
+
+      <main id="main">
+        <slot />
+      </main>
+
+      <footer class="site-footer">
+        <span>&copy; {new Date().getFullYear()} {SITE_AUTHOR}</span>
+        <span><a href="/log/rss.xml">RSS</a></span>
+      </footer>
+    </div>
+  </body>
+</html>

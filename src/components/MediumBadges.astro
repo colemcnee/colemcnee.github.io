@@ -1,0 +1,28 @@
+---
+import { MEDIUM_LABELS, type Medium } from '../content.config';
+
+interface Props {
+  mediums: Medium[];
+  /** Render as links to the medium archive. */
+  link?: boolean;
+  active?: Medium;
+}
+
+const { mediums, link = true, active } = Astro.props;
+---
+
+<ul class="tag-row">
+  {
+    mediums.map((medium) => (
+      <li>
+        {link ? (
+          <a class="badge" href={`/work/medium/${medium}`} data-active={medium === active}>
+            {MEDIUM_LABELS[medium]}
+          </a>
+        ) : (
+          <span class="badge">{MEDIUM_LABELS[medium]}</span>
+        )}
+      </li>
+    ))
+  }
+</ul>

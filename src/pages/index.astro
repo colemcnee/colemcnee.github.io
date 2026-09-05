@@ -1,0 +1,54 @@
+---
+import Base from '../layouts/Base.astro';
+import WorkCard from '../components/WorkCard.astro';
+import LogListItem from '../components/LogListItem.astro';
+import { getLogEntries, getPinnedWork } from '../lib/content';
+
+const recentLog = (await getLogEntries()).slice(0, 5);
+const pinnedWork = await getPinnedWork();
+---
+
+<Base>
+  <section class="section">
+    <p class="eyebrow">Software · Print · Performance</p>
+    <p class="lede">
+      I build small, self-contained software — most of it local-first, some of it ending up
+      on paper or on a stage. <a href="/work">Work</a> is what came out; the <a href="/log">log</a> is
+      where the making gets written down.
+    </p>
+  </section>
+
+  {
+    pinnedWork.length > 0 && (
+      <section class="section">
+        <div class="section-head">
+          <h2>Selected work</h2>
+          <a class="meta" href="/work">All work &rarr;</a>
+        </div>
+        <ul class="work-grid">
+          {pinnedWork.map((entry) => (
+            <WorkCard entry={entry} />
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  <section class="section">
+    <div class="section-head">
+      <h2>From the log</h2>
+      <a class="meta" href="/log">All entries &rarr;</a>
+    </div>
+    {
+      recentLog.length > 0 ? (
+        <ul class="entry-list">
+          {recentLog.map((entry) => (
+            <LogListItem entry={entry} />
+          ))}
+        </ul>
+      ) : (
+        <p class="meta">No entries yet.</p>
+      )
+    }
+  </section>
+</Base>

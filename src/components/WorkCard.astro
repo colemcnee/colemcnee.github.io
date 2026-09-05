@@ -1,0 +1,20 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { mediumsOf } from '../lib/content';
+import MediumBadges from './MediumBadges.astro';
+
+interface Props {
+  entry: CollectionEntry<'work'>;
+}
+
+const { entry } = Astro.props;
+---
+
+<li class="work-card">
+  <MediumBadges mediums={mediumsOf(entry)} />
+  <h3><a href={`/work/${entry.id}`}>{entry.data.title}</a></h3>
+  <p>{entry.data.summary}</p>
+  <span class="meta">
+    {entry.data.year}{entry.data.role ? ` · ${entry.data.role}` : ''}
+  </span>
+</li>

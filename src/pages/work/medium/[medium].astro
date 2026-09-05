@@ -1,0 +1,55 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Base from '../../../layouts/Base.astro';
+import WorkCard from '../../../components/WorkCard.astro';
+import { getWorkEntries, mediumsOf } from '../../../lib/content';
+import { MEDIUMS, MEDIUM_LABELS, type Medium } from '../../../content.config';
+
+export const getStaticPaths = (async () => {
+  const entries = await getWorkEntries();
+  return MEDIUMS.map((medium) => ({
+    params: { medium },
+    props: {
+      medium,
+      entries: entries.filter((entry) => mediumsOf(entry).includes(medium)),
+    },
+  }));
+}) satisfies GetStaticPaths;
+
+const { medium, entries } = Astro.props as {
+  medium: Medium;
+  entries: Awaited<ReturnType<typeof getWorkEntries>>;
+};
+const label = MEDIUM_LABELS[medium];
+---
+
+<Base title={`${label} — Work`} description={`Work in ${label.toLowerCase()}.`}>
+  <header class="entry-header">
+    <p class="eyebrow">Work</p>
+    <h1>{label}</h1>
+    <ul class="tag-row" style="margin-top: 0.9rem;">
+      <li><a class="badge" href="/work">All</a></li>
+      {
+        MEDIUMS.map((other) => (
+          <li>
+            <a class="badge" href={`/work/medium/${other}`} data-active={other === medium}>
+              {MEDIUM_LABELS[other]}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </header>
+
+  {
+    entries.length > 0 ? (
+      <ul class="work-grid">
+        {entries.map((entry) => (
+          <WorkCard entry={entry} />
+        ))}
+      </ul>
+    ) : (
+      <p class="meta">Nothing in {label.toLowerCase()} yet.</p>
+    )
+  }
+</Base>

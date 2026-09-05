@@ -1,0 +1,19 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import FormattedDate from './FormattedDate.astro';
+
+interface Props {
+  entry: CollectionEntry<'log'>;
+}
+
+const { entry } = Astro.props;
+---
+
+<li>
+  <span class="meta">
+    <FormattedDate date={entry.data.date} />
+    {entry.data.kind === 'note' ? ' · note' : ''}
+  </span>
+  <h3><a href={`/log/${entry.id}`}>{entry.data.title}</a></h3>
+  {entry.data.description && <p>{entry.data.description}</p>}
+</li>

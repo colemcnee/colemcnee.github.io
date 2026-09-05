@@ -1,0 +1,63 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import FormattedDate from '../../components/FormattedDate.astro';
+import { getLogEntries, getWorkEntries } from '../../lib/content';
+
+export const getStaticPaths = (async () => {
+  const entries = await getLogEntries();
+  return entries.map((entry) => ({ params: { id: entry.id }, props: { entry } }));
+}) satisfies GetStaticPaths;
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+
+const allWork = await getWorkEntries();
+const related = allWork.filter((work) => entry.data.relatedWork.includes(work.id));
+---
+
+<Base title={entry.data.title} description={entry.data.description} type="article">
+  <article class="prose">
+    <header class="entry-header">
+      <p class="eyebrow">Log{entry.data.kind === 'note' ? ' · Note' : ''}</p>
+      <h1>{entry.data.title}</h1>
+      <p class="meta">
+        <FormattedDate date={entry.data.date} />
+        {entry.data.updated && (
+          <>
+            {' · updated '}
+            <FormattedDate date={entry.data.updated} />
+          </>
+        )}
+      </p>
+    </header>
+
+    <Content />
+
+    {
+      related.length > 0 && (
+        <section>
+          <hr />
+          <h2>Related work</h2>
+          <ul>
+            {related.map((work) => (
+              <li>
+                <a href={`/work/${work.id}`}>{work.data.title}</a> — {work.data.summary}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    {
+      entry.data.tags.length > 0 && (
+        <p class="meta">Tagged: {entry.data.tags.join(', ')}</p>
+      )
+    }
+
+    <hr />
+    <p class="meta"><a href="/log">&larr; All log entries</a></p>
+  </article>
+</Base>
